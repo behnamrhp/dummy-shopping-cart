@@ -10,6 +10,7 @@ const mockUseProducts = useProductsQuery as jest.Mock<any>;
 jest.mock('./hooks/useProductsQuery', () => ({
   useProductsQuery : jest.fn()
 }));
+
 const mokedReturnData = [{
   id : 1,
   category : 'test',
@@ -19,6 +20,20 @@ const mokedReturnData = [{
   title : 'test',
   amount : 10
 }]
+
+function showDrawer(appComponent: RenderResult) {
+  //get cartIcon button
+  const cartIconEl = appComponent.getByTestId('cartIcon');
+
+  //click it
+  fireEvent.click(cartIconEl);
+}
+
+function clickCartButton(appComponent: RenderResult){
+ const addToCartButton = appComponent.queryAllByTestId('addToCart')
+
+ fireEvent.click(addToCartButton[0])
+}
 
   it('renders without error', () => {
     mockUseProducts.mockReturnValue({ isLoading : false });
@@ -78,47 +93,9 @@ const mokedReturnData = [{
       })
     })
 
-    it(`render currect types object on return `, () => {
-      mockUseProducts.mockReturnValue({
-        isError: false,
-        isLoading : false,
-        data : mokedReturnData
-      });
-
-      const appComponent = render(<App />);
-
-      const titleElement = appComponent.getByTestId('title');
-      const descriptionElement = appComponent.getByTestId('description');
-      const priceElement = appComponent.getByTestId('price');
-      const imageElement = appComponent.getByTestId('image');
-      
-      expect(titleElement).toBeInTheDocument();
-      expect(descriptionElement).toBeInTheDocument();
-      expect(priceElement).toBeInTheDocument();
-      expect(imageElement).toBeInTheDocument();
-
-    })
-
-    
-
   })
 
-  function showDrawer(appComponent: RenderResult) {
-     //get cartIcon button
-     const cartIconEl = appComponent.getByTestId('cartIcon');
-
-     //click it
-     fireEvent.click(cartIconEl);
- 
-  }
-
-  function clickCartButton(appComponent: RenderResult){
-    const addToCartButton = appComponent.queryAllByTestId('addToCart')
-
-    fireEvent.click(addToCartButton[0])
-  }
-
-  describe('test app functionality', () => {
+  describe('integration app testing', () => {
     let appComponent:RenderResult;
 
     beforeEach(() => {
@@ -148,9 +125,6 @@ const mokedReturnData = [{
     })
 
     it.skip('show drawer on Click cartIcon button', () => {
-      // const mockSetCartIcon = jest.fn();
-      
-      // React.useState = jest.fn(() => [false, mockSetCartIcon])
       const appComponent = render(<App />)
       
       showDrawer(appComponent);
@@ -162,26 +136,6 @@ const mokedReturnData = [{
     })
 
     it('increase amount cartitem by click plus', () => {
-    //   React.useState = jest.fn()
-    //     .mockReturnValueOnce([true, jest.fn() ])
-    //     .mockReturnValueOnce([ [{
-    //       id : 1,
-    //       title: 'test',
-    //       description: 'test',
-    //       amount: 1,
-    //       category: 'test',
-    //       image: 'test',
-    //       price: 22
-    //   },{
-    //     id : 2,
-    //     title: 'test',
-    //     description: 'test',
-    //     amount: 2,
-    //     category: 'test',
-    //     image: 'test',
-    //     price: 22
-    // }], jest.fn() ])
-        
       const increaseButtons = appComponent.queryAllByTestId('increase');
 
       const amounts = screen.queryAllByTestId('amount') as Element[];
@@ -197,11 +151,13 @@ const mokedReturnData = [{
 
     describe('decrease amount', () => {
       it('decrease amount item by click minus', () => {
-        //get button
+
+        //added amount to test more than one amount on click decrease button
         const increaseButtons = appComponent.queryAllByTestId('increase');
-  
-        const decreaseButton = appComponent.queryAllByTestId('decrease') as Element[];
         fireEvent.click(increaseButtons[0])
+
+        //get button
+        const decreaseButton = appComponent.queryAllByTestId('decrease') as Element[];
   
         const amounts        = appComponent.queryAllByTestId('amount') as Element[];
   
@@ -218,7 +174,7 @@ const mokedReturnData = [{
         expect(newAmount[0].innerHTML).toBe( String( lastAmount - 1) )
       })
 
-      it('item not exist on amount one', () => {
+      it('item not exist on amount one when clicked decrease button', () => {
         const decreaseButton = appComponent.queryAllByTestId('decrease') as Element[];
         fireEvent.click(decreaseButton[0]);
         
