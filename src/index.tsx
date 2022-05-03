@@ -3,6 +3,7 @@ import reportWebVitals from './reportWebVitals';
 import {  QueryClientProvider, QueryClient } from 'react-query';
 import { createRoot } from 'react-dom/client';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 
 export const client = new QueryClient();
 
@@ -14,6 +15,8 @@ root.render(
         <ReactQueryDevtools initialIsOpen={true} position='bottom-left' />
     </QueryClientProvider>
 );
+
+serviceWorkerRegistration.register();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

@@ -13,8 +13,22 @@ import { cartItemType } from './types/apis';
 function App() {
   const [ isCartOpen, setIsCartOpen ] = React.useState(false);
   const [ cartItems, setCartItems ]   = React.useState([] as cartItemType[]);
-
+  const [ cachedData, setCachedData ] = React.useState<[] | cartItemType[]>([])
+  
   const { data, isLoading, error, isError } = useProductsQuery();
+
+  React.useEffect(() => {
+    if(data || !('caches' in window) ) return;
+
+    caches.match('products')
+      .then(response  => {
+        console.log('our cached data is: ' , response);
+
+        const cachedData = response as [] | cartItemType[] | undefined
+
+        if(cachedData) setCachedData(cachedData);
+      })
+  }, [])
 
   const handleAddToCart = (clickedItem: cartItemType) => {
     setCartItems( prev => {
@@ -50,9 +64,18 @@ function App() {
   if( isLoading ) return <LinearProgress data-testid="loading" />
 
   if( isError ) return <div data-testid="error">some errors uccured</div>
+  
   return (
       <Wrapper data-testid="app">
-        <Drawer anchor='right' open={isCartOpen} onClose={() => setIsCartOpen(false) } data-testid="drawer">
+        <Drawer 
+          anchor='right' 
+          open={isCartOpen} 
+          onClose={() => setIsCartOpen(false) } 
+          data-testid="drawer"
+          sx={{
+            '& .MuiDrawer-paperAnchorRight' : {width: { xs : '80%', sm : '80%', md :'auto'}}
+          }}
+          >
             <Cart 
               cartItems={cartItems}
               addToCart={handleAddToCart}
@@ -67,7 +90,7 @@ function App() {
         </StyledButton>
 
         <Grid container spacing={3}>
-          { data?.map(item => (
+          { ( data ? data : cachedData ).map(item => (
             <Grid item xs={12} md={4} key={item.id} >
               <Item item={item} handleAddToCart={handleAddToCart} />
             </Grid>
